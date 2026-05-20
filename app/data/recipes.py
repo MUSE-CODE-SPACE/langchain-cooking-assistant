@@ -2,8 +2,9 @@
 Recipe Database - Comprehensive recipe collection for the cooking assistant
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
 from enum import Enum
 
 
@@ -43,8 +44,8 @@ class Ingredient:
     name: str
     amount: str
     unit: str
-    notes: Optional[str] = None
-    substitutes: List[str] = field(default_factory=list)
+    notes: str | None = None
+    substitutes: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -69,19 +70,19 @@ class Recipe:
     prep_time_min: int
     cook_time_min: int
     servings: int
-    ingredients: List[Ingredient]
-    instructions: List[str]
-    tips: List[str]
-    dietary_tags: List[DietaryTag] = field(default_factory=list)
-    nutrition: Optional[NutritionInfo] = None
-    image_url: Optional[str] = None
+    ingredients: list[Ingredient]
+    instructions: list[str]
+    tips: list[str]
+    dietary_tags: list[DietaryTag] = field(default_factory=list)
+    nutrition: NutritionInfo | None = None
+    image_url: str | None = None
 
 
 # =============================================================================
 # RECIPE DATABASE
 # =============================================================================
 
-RECIPES_DB: Dict[str, Recipe] = {
+RECIPES_DB: dict[str, Recipe] = {
     "kimchi_fried_rice": Recipe(
         id="kimchi_fried_rice",
         name="Kimchi Fried Rice (Kimchi Bokkeumbap)",
@@ -510,7 +511,7 @@ RECIPES_DB: Dict[str, Recipe] = {
 # INGREDIENT DATABASE
 # =============================================================================
 
-INGREDIENTS_DB: Dict[str, Dict] = {
+INGREDIENTS_DB: dict[str, dict] = {
     "chicken_breast": {
         "name": "Chicken Breast",
         "category": "protein",
@@ -574,7 +575,7 @@ INGREDIENTS_DB: Dict[str, Dict] = {
 # COOKING TECHNIQUES
 # =============================================================================
 
-TECHNIQUES_DB: Dict[str, Dict] = {
+TECHNIQUES_DB: dict[str, dict] = {
     "saute": {
         "name": "Sauté",
         "description": "Cooking food quickly in a small amount of fat over high heat",
@@ -637,18 +638,18 @@ TECHNIQUES_DB: Dict[str, Dict] = {
 # HELPER FUNCTIONS
 # =============================================================================
 
-def get_recipe(recipe_id: str) -> Optional[Recipe]:
+def get_recipe(recipe_id: str) -> Recipe | None:
     """Get a recipe by ID."""
     return RECIPES_DB.get(recipe_id)
 
 
 def search_recipes(
     query: str = "",
-    cuisine: Optional[Cuisine] = None,
-    difficulty: Optional[Difficulty] = None,
-    dietary_tags: Optional[List[DietaryTag]] = None,
-    max_time_min: Optional[int] = None
-) -> List[Recipe]:
+    cuisine: Cuisine | None = None,
+    difficulty: Difficulty | None = None,
+    dietary_tags: list[DietaryTag] | None = None,
+    max_time_min: int | None = None,
+) -> list[Recipe]:
     """Search recipes by various criteria."""
     results = []
 
@@ -670,9 +671,10 @@ def search_recipes(
             continue
 
         # Filter by dietary tags
-        if dietary_tags:
-            if not all(tag in recipe.dietary_tags for tag in dietary_tags):
-                continue
+        if dietary_tags and not all(
+            tag in recipe.dietary_tags for tag in dietary_tags
+        ):
+            continue
 
         # Filter by time
         if max_time_min:
@@ -685,7 +687,7 @@ def search_recipes(
     return results
 
 
-def get_recipes_by_ingredient(ingredient: str) -> List[Recipe]:
+def get_recipes_by_ingredient(ingredient: str) -> list[Recipe]:
     """Find recipes containing a specific ingredient."""
     ingredient_lower = ingredient.lower()
     results = []
@@ -699,23 +701,23 @@ def get_recipes_by_ingredient(ingredient: str) -> List[Recipe]:
     return results
 
 
-def get_ingredient_info(ingredient_name: str) -> Optional[Dict]:
+def get_ingredient_info(ingredient_name: str) -> dict | None:
     """Get information about an ingredient."""
     ingredient_key = ingredient_name.lower().replace(" ", "_")
     return INGREDIENTS_DB.get(ingredient_key)
 
 
-def get_technique_info(technique_name: str) -> Optional[Dict]:
+def get_technique_info(technique_name: str) -> dict | None:
     """Get information about a cooking technique."""
     technique_key = technique_name.lower().replace(" ", "_").replace("-", "_")
     return TECHNIQUES_DB.get(technique_key)
 
 
-def get_all_cuisines() -> List[str]:
+def get_all_cuisines() -> list[str]:
     """Get list of all available cuisines."""
     return [c.value for c in Cuisine]
 
 
-def get_all_dietary_tags() -> List[str]:
+def get_all_dietary_tags() -> list[str]:
     """Get list of all dietary tags."""
     return [t.value for t in DietaryTag]
